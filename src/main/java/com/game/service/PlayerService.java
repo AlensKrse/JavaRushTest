@@ -45,7 +45,7 @@ public interface PlayerService {
 
     boolean isPlayerValid(Player player);
 
-    double computeLevel(Integer experience);
+    Integer computeLevel(Integer experience);
 
-    double untilNextLevel(Integer level, Integer experience);
+    Integer untilNextLevel(Integer level, Integer experience);
 }

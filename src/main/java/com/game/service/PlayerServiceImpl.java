@@ -29,21 +29,103 @@ public class PlayerServiceImpl implements PlayerService{
         this.playerRepository = playerRepository;
     }
 
+
+    //Ready
     @Override
     public Player savePlayer(Player player) {
         return playerRepository.save(player);
     }
 
+
+    //Ready
     @Override
-    public Player updatePlayer(Player oldPlayer, Player newPlayer) {
-        return null;
+    public Player updatePlayer(Player oldPlayer, Player newPlayer) throws IllegalArgumentException{
+        boolean shouldChangeLevel = false;
+
+        final String name = newPlayer.getName();
+        if (name != null) {
+            if (isNameValid(name)) {
+                oldPlayer.setName(name);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        final String title = newPlayer.getTitle();
+        if (title != null) {
+            if (isTitleValid(title)) {
+                oldPlayer.setTitle(title);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        if (newPlayer.getRace() != null) {
+            oldPlayer.setRace(newPlayer.getRace());
+        }
+
+        if (newPlayer.getProfession() != null) {
+            oldPlayer.setProfession(newPlayer.getProfession());
+        }
+
+        final Date birthday = newPlayer.getBirthday();
+        if (birthday != null) {
+            if (isProdDateValid(birthday)) {
+                oldPlayer.setBirthday(birthday);
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+        if (newPlayer.getBanned() != null) {
+            oldPlayer.setBanned(newPlayer.getBanned());
+        }
+
+        final Integer exp = newPlayer.getExperience();
+        if (exp != null) {
+            if (isExpValid(exp)) {
+                oldPlayer.setExperience(exp);
+                shouldChangeLevel = true;
+            } else {
+                throw new IllegalArgumentException();
+            }
+        }
+
+        final Integer level = newPlayer.getLevel();
+        if (level != null) {
+                oldPlayer.setLevel(level);
+            shouldChangeLevel = true;
+            }else {
+                throw new IllegalArgumentException();
+            }
+
+        final Integer untilNextLevel = newPlayer.getUntilNextLevel();
+        if (untilNextLevel != null) {
+            oldPlayer.setUntilNextLevel(untilNextLevel);
+        }
+        else {
+                throw new IllegalArgumentException();
+            }
+
+        if (shouldChangeLevel) {
+            final Integer level1 = computeLevel(oldPlayer.getExperience());
+            oldPlayer.setLevel(level1);
+            final Integer untilNextLevel1 = untilNextLevel(oldPlayer.getLevel(), oldPlayer.getExperience());
+            oldPlayer.setUntilNextLevel(untilNextLevel1);
+        }
+        playerRepository.save(oldPlayer);
+        return oldPlayer;
     }
 
+
+
+    //Ready
     @Override
     public void deletePlayer(Player player) {
     playerRepository.delete(player);
     }
 
+
+    //Ready
     @Override
     public List<Player> getPlayers(String name, String title, Race race, Profession profession, Long after, Long before,
                                    Boolean banned, Integer minExperience, Integer maxExperience, Integer minLevel, Integer maxLevel) {
@@ -68,11 +150,16 @@ public class PlayerServiceImpl implements PlayerService{
         return list;
     }
 
+
+
+    //Ready
     @Override
     public Player getPlayer(Long id) {
         return playerRepository.findById(id).orElse(null);
     }
 
+
+    //Ready
     @Override
     public List<Player> sortPlayers(List<Player> players, PlayerOrder order) {
         if (order != null) {
@@ -98,6 +185,8 @@ public class PlayerServiceImpl implements PlayerService{
         return players;
     }
 
+
+    //Ready
     @Override
     public List<Player> getPage(List<Player> players, Integer pageNumber, Integer pageSize) {
         final Integer page = pageNumber == null ? 0 : pageNumber;
@@ -108,7 +197,7 @@ public class PlayerServiceImpl implements PlayerService{
         return players.subList(from, to);
     }
 
-
+    //Ready
     @Override
     public boolean isPlayerValid(Player player) {
         return player != null && isNameValid(player.getName()) && isTitleValid(player.getTitle())
@@ -116,6 +205,25 @@ public class PlayerServiceImpl implements PlayerService{
                 && player.getBirthday().getTime()>0
                 && isExpValid(player.getExperience());
     }
+
+
+
+    //Ready
+    @Override
+    public Integer computeLevel(Integer experience) {
+         double result = Math.sqrt(2500 + (200 * experience) - 50)/100;
+         return (int) result;
+    }
+
+    //Ready
+    @Override
+    public Integer untilNextLevel(Integer level, Integer experience) {
+       double result = 50 * (level+1) * (level+2) - experience;
+       return (int) result;
+    }
+
+
+    //Help methods
     private boolean isNameValid(String value) {
         final int maxStringLength = 12;
         return value != null && !value.isEmpty() && value.length() <= maxStringLength;
@@ -136,26 +244,16 @@ public class PlayerServiceImpl implements PlayerService{
         return expSize != null && expSize.compareTo(minCrewSize) >= 0 && expSize.compareTo(maxCrewSize) <= 0;
     }
 
-    @Override
-    public double computeLevel(Integer experience) {
-        return 0;
-    }
-
-    @Override
-    public double untilNextLevel(Integer level, Integer experience) {
-        return 0;
-    }
-
     private Date getDateForYear(int year) {
         final Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, year);
         return calendar.getTime();
     }
 
-    private int getYearFromDate(Date date) {
-        final Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        return calendar.get(Calendar.YEAR);
+
+
+    private double round(double value) {
+        return Math.round(value * 100) / 100D;
     }
 
 }
