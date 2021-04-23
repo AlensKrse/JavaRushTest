@@ -2,7 +2,10 @@ package com.game.service;
 
 import com.game.controller.PlayerOrder;
 import com.game.entity.Player;
+import com.game.entity.Profession;
+import com.game.entity.Race;
 
+import java.util.Date;
 import java.util.List;
 
 public interface PlayerService {
@@ -15,19 +18,34 @@ public interface PlayerService {
 6. получать отфильтрованный список игроков в соответствии с переданными фильтрами;
 7. получать количество игроков, которые соответствуют фильтрам.
      */
-    List<Player> getAllPlayers();
 
-    void savePlayer(Player player);
-
-    Player updatePlayer(Player oldPlayer, Player newPlayer);
-
-    void deletePlayer(Player player);
+    Player savePlayer(Player player);
 
     Player getPlayer(int id);
 
+    Player updatePlayer(Player oldPlayer, Player newPlayer) throws IllegalArgumentException;
+
+    void deletePlayer(Player player);
+
+    List<Player> getPlayers(String name,
+                            String title,
+                            Race race,
+                            Profession profession,
+                            Long after,
+                            Long before,
+                            Boolean banned,
+                            Integer minExperience,
+                            Integer maxExperience,
+                            Integer minLevel,
+                            Integer maxLevel);
+
     List<Player> sortPlayers(List<Player> players, PlayerOrder order);
 
-    int countOfSortedPlayers(List<Player> SortedPlayers);
+    List<Player> getPage(List<Player> players, Integer pageNumber, Integer pageSize);
+
+    boolean isPlayerValid(Player player);
+
+    double computeRating(double speed, boolean isUsed, Date prod);
 
 
 }

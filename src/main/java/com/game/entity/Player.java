@@ -21,19 +21,19 @@ public class Player {
     @Column(name="profession")
     private Profession profession;
     @Column(name="experience")
-    private int experience;
+    private Integer experience;
     @Column(name="level")
-    private int level;
+    private Integer level;
     @Column(name="untilNextLevel")
-    private int untilNextLevel;
+    private Integer untilNextLevel;
     @Temporal(TemporalType.DATE)
     @Column(name="birthday")
     private Date birthday;
     @Column(name="banned")
-    private boolean banned;
+    private Boolean banned;
 
 
-    public Player(long id, String name, String title, Race race, Profession profession, int experience, int level, int untilNextLevel, Date birthday, boolean banned) {
+    public Player(long id, String name, String title, Race race, Profession profession, Integer experience, Integer level, Integer untilNextLevel, Date birthday, Boolean banned) {
         this.id = id;
         this.name = name;
         this.title = title;
@@ -46,9 +46,7 @@ public class Player {
         this.banned = banned;
     }
 
-    public Player() {
-
-    }
+    public Player(){}
 
     public long getId() {
         return id;
@@ -90,27 +88,27 @@ public class Player {
         this.profession = profession;
     }
 
-    public int getExperience() {
+    public Integer getExperience() {
         return experience;
     }
 
-    public void setExperience(int experience) {
+    public void setExperience(Integer experience) {
         this.experience = experience;
     }
 
-    public int getLevel() {
+    public Integer getLevel() {
         return level;
     }
 
-    public void setLevel(int level) {
+    public void setLevel(Integer level) {
         this.level = level;
     }
 
-    public int getUntilNextLevel() {
+    public Integer getUntilNextLevel() {
         return untilNextLevel;
     }
 
-    public void setUntilNextLevel(int untilNextLevel) {
+    public void setUntilNextLevel(Integer untilNextLevel) {
         this.untilNextLevel = untilNextLevel;
     }
 
@@ -122,11 +120,11 @@ public class Player {
         this.birthday = birthday;
     }
 
-    public boolean isBanned() {
+    public Boolean getBanned() {
         return banned;
     }
 
-    public void setBanned(boolean banned) {
+    public void setBanned(Boolean banned) {
         this.banned = banned;
     }
 }
