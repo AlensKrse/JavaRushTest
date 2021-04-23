@@ -9,7 +9,7 @@ public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id")
-    private long id;
+    private Long id;
     @Column(name="name")
     private String name;
     @Column(name="title")
@@ -33,7 +33,7 @@ public class Player {
     private Boolean banned;
 
 
-    public Player(long id, String name, String title, Race race, Profession profession, Integer experience, Integer level, Integer untilNextLevel, Date birthday, Boolean banned) {
+    public Player(Long id, String name, String title, Race race, Profession profession, Integer experience, Integer level, Integer untilNextLevel, Date birthday, Boolean banned) {
         this.id = id;
         this.name = name;
         this.title = title;
@@ -48,11 +48,11 @@ public class Player {
 
     public Player(){}
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

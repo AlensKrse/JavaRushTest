@@ -66,8 +66,65 @@ public class PlayerController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         if(player.getBanned() == null) player.setBanned(false);
-        player.s
-
+        player.setExperience(player.getExperience());
+        final double level = playerService.computeLevel(player.getExperience());
+        player.setLevel((int) level);
+        final double untilNextLevel = playerService.untilNextLevel(player.getLevel(), player.getExperience());
+        player.setUntilNextLevel((int) untilNextLevel);
+        final Player savedPlayer = playerService.savePlayer(player);
+        return new ResponseEntity<>(savedPlayer, HttpStatus.OK);
     }
 
+    @RequestMapping(path = "/rest/players/{id}", method = RequestMethod.GET)
+    public ResponseEntity<Player> getPlayer(@PathVariable(value = "id") String pathId){
+        final Long id = convertIdToLong(pathId);
+        if(id == null || id <= 0) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        final Player player = playerService.getPlayer(id);
+        if (player == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(player, HttpStatus.OK);
+    }
+
+    @RequestMapping(path = "/rest/players/{id}", method = RequestMethod.POST)
+    @ResponseBody
+    public ResponseEntity<Player> updatePlayer(@PathVariable(value = "id") String pathId,
+                                               @RequestBody Player player) {
+        final ResponseEntity<Player> entity = getPlayer(pathId);
+        final Player savedPlayer = entity.getBody();
+        if (savedPlayer == null){
+            return entity;
+        }
+        final Player result;
+        try{
+            result = playerService.updatePlayer(savedPlayer,player);
+        }
+        catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @RequestMapping(path = "/rest/players/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<Player> deletePlayer(@PathVariable(value = "id") String pathId) {
+        final ResponseEntity<Player> entity = getPlayer(pathId);
+        final Player savedPlayer = entity.getBody();
+        if(savedPlayer == null) {
+            return entity;
+        }
+        playerService.deletePlayer(savedPlayer);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+    
+    private Long convertIdToLong(String pathId) {
+        if (pathId == null) {
+            return null;
+        } else try {
+            return Long.parseLong(pathId);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

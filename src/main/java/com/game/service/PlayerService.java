@@ -21,7 +21,7 @@ public interface PlayerService {
 
     Player savePlayer(Player player);
 
-    Player getPlayer(int id);
+    Player getPlayer(Long id);
 
     Player updatePlayer(Player oldPlayer, Player newPlayer) throws IllegalArgumentException;
 
@@ -45,7 +45,7 @@ public interface PlayerService {
 
     boolean isPlayerValid(Player player);
 
-    double computeRating(double speed, boolean isUsed, Date prod);
+    double computeLevel(Integer experience);
 
-
+    double untilNextLevel(Integer level, Integer experience);
 }

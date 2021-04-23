@@ -39,7 +39,7 @@ return player;
     }
 
     @Override
-    public Player getPlayer(int id) {
+    public Player getPlayer(Long id) {
         return null;
     }
 
