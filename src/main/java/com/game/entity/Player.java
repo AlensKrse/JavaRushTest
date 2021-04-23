@@ -32,6 +32,24 @@ public class Player {
     @Column(name="banned")
     private boolean banned;
 
+
+    public Player(long id, String name, String title, Race race, Profession profession, int experience, int level, int untilNextLevel, Date birthday, boolean banned) {
+        this.id = id;
+        this.name = name;
+        this.title = title;
+        this.race = race;
+        this.profession = profession;
+        this.experience = experience;
+        this.level = level;
+        this.untilNextLevel = untilNextLevel;
+        this.birthday = birthday;
+        this.banned = banned;
+    }
+
+    public Player() {
+
+    }
+
     public long getId() {
         return id;
     }
