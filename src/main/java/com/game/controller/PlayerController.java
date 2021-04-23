@@ -5,7 +5,10 @@ import com.game.entity.Profession;
 import com.game.entity.Race;
 import com.game.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,17 +16,15 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping("/rest/players")
+@RequestMapping("/rest")
 public class PlayerController {
-    @Autowired
-    private final PlayerService playerService;
+
+    private PlayerService playerService;
 
     @Autowired
-    public PlayerController(PlayerService playerService) {
-        this.playerService = playerService;
-    }
+    public void setPlayerService(PlayerService playerService) {this.playerService = playerService;}
 
-    @RequestMapping(path = "/rest/players", method = RequestMethod.GET)
+    @RequestMapping(path = "/players", method = RequestMethod.GET)
     public List<Player> getAllPlayers(@RequestParam(value = "name", required = false) String name,
                                       @RequestParam(value = "title", required = false) String title,
                                       @RequestParam(value = "race", required = false) Race race,
@@ -35,97 +36,62 @@ public class PlayerController {
                                       @RequestParam(value = "maxExperience", required = false) Integer maxExperience,
                                       @RequestParam(value = "minLevel", required = false) Integer minLevel,
                                       @RequestParam(value = "maxLevel", required = false) Integer maxLevel,
-                                      @RequestParam(value = "order", required = false) PlayerOrder order,
-                                      @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-                                      @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-        final List<Player> players = playerService.getPlayers(name, title, race, profession, after, before, banned,
-                minExperience, maxExperience, minLevel, maxLevel);
-        final List<Player> sortedPlayers = playerService.sortPlayers(players,order);
-        return playerService.getPage(sortedPlayers,pageNumber,pageSize);
+                                      @RequestParam(value = "order", required = false, defaultValue = "ID") PlayerOrder order,
+                                      @RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer pageNumber,
+                                      @RequestParam(value = "pageSize", required = false, defaultValue = "3") Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()));
+        return playerService.getAllPlayers(Specification.where(playerService.filterByName(name)
+                .and(playerService.filterByTitle(title)))
+                .and(playerService.filterByRace(race))
+                .and(playerService.filterByProfession(profession))
+                .and(playerService.filterByBirthday(after, before))
+                .and(playerService.filterByBanned(banned))
+                .and(playerService.filterByExperience(minExperience, maxExperience))
+                .and(playerService.filterByLevel(minLevel, maxLevel)),pageable).getContent();
     }
 
-    @RequestMapping(path = "/rest/players/count", method = RequestMethod.GET)
-    public Integer getPlayersCount(@RequestParam(value = "name", required = false) String name,
-                                   @RequestParam(value = "title", required = false) String title,
-                                   @RequestParam(value = "race", required = false) Race race,
-                                   @RequestParam(value = "profession", required = false) Profession profession,
-                                   @RequestParam(value = "after", required = false) Long after,
-                                   @RequestParam(value = "before", required = false) Long before,
-                                   @RequestParam(value = "banned", required = false) Boolean banned,
-                                   @RequestParam(value = "minExperience", required = false) Integer minExperience,
-                                   @RequestParam(value = "maxExperience", required = false) Integer maxExperience,
-                                   @RequestParam(value = "minLevel", required = false) Integer minLevel,
-                                   @RequestParam(value = "maxLevel", required = false) Integer maxLevel){
-        return playerService.getPlayers(name, title, race, profession, after, before, banned, minExperience,
-                maxExperience, minLevel , maxLevel).size();
+    @GetMapping("/players/count")
+    public @ResponseBody Long getPlayersCount(@RequestParam(value = "name", required = false) String name,
+                                              @RequestParam(value = "title", required = false) String title,
+                                            @RequestParam(value = "race", required = false) Race race,
+                                            @RequestParam(value = "profession", required = false) Profession profession,
+                                            @RequestParam(value = "after", required = false) Long after,
+                                            @RequestParam(value = "before", required = false) Long before,
+                                            @RequestParam(value = "banned", required = false) Boolean banned,
+                                            @RequestParam(value = "minExperience", required = false) Integer minExperience,
+                                            @RequestParam(value = "maxExperience", required = false) Integer maxExperience,
+                                            @RequestParam(value = "minLevel", required = false) Integer minLevel,
+                                            @RequestParam(value = "maxLevel", required = false) Integer maxLevel) {
+        return playerService.getPlayersCount(Specification.where(playerService.filterByName(name)
+                        .and(playerService.filterByTitle(title)))
+                        .and(playerService.filterByRace(race))
+                        .and(playerService.filterByProfession(profession))
+                        .and(playerService.filterByBirthday(after, before))
+                        .and(playerService.filterByBanned(banned))
+                        .and(playerService.filterByExperience(minExperience, maxExperience))
+                        .and(playerService.filterByLevel(minLevel, maxLevel)));
     }
 
-    @RequestMapping(path = "/rest/players", method = RequestMethod.POST)
+    @PostMapping("/players/")
     @ResponseBody
-    public ResponseEntity<Player> createPlayer(Player player){
-        if(!playerService.isPlayerValid(player)){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        if(player.getBanned() == null) player.setBanned(false);
-        player.setExperience(player.getExperience());
-        final double level = playerService.computeLevel(player.getExperience());
-        player.setLevel((int) level);
-        final double untilNextLevel = playerService.untilNextLevel(player.getLevel(), player.getExperience());
-        player.setUntilNextLevel((int) untilNextLevel);
-        final Player savedPlayer = playerService.savePlayer(player);
-        return new ResponseEntity<>(savedPlayer, HttpStatus.OK);
+    public ResponseEntity<Player> createPlayer(@RequestBody Player player) {
+        return ResponseEntity.ok(playerService.createPlayer(player));
     }
 
-    @RequestMapping(path = "/rest/players/{id}", method = RequestMethod.GET)
-    public ResponseEntity<Player> getPlayer(@PathVariable(value = "id") String pathId){
-        final Long id = convertIdToLong(pathId);
-        if(id == null || id <= 0) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        final Player player = playerService.getPlayer(id);
-        if (player == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(player, HttpStatus.OK);
+    @GetMapping("/players/{id}")
+   public @ResponseBody ResponseEntity<Player> getPlayer(@PathVariable Long id){
+        return ResponseEntity.ok(playerService.getPlayer(id));
     }
 
-    @RequestMapping(path = "/rest/players/{id}", method = RequestMethod.POST)
-    @ResponseBody
-    public ResponseEntity<Player> updatePlayer(@PathVariable(value = "id") String pathId,
-                                               @RequestBody Player player) {
-        final ResponseEntity<Player> entity = getPlayer(pathId);
-        final Player savedPlayer = entity.getBody();
-        if (savedPlayer == null){
-            return entity;
-        }
-        final Player result;
-        try{
-            result = playerService.updatePlayer(savedPlayer,player);
-        }
-        catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(result, HttpStatus.OK);
+    @PostMapping("/players/{id}")
+    public ResponseEntity<Player> updatePlayer(@PathVariable Long id, @RequestBody Player oldPlayer) {
+        return ResponseEntity.ok(playerService.updatePlayer(id, oldPlayer));
     }
 
-    @RequestMapping(path = "/rest/players/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<Player> deletePlayer(@PathVariable(value = "id") String pathId) {
-        final ResponseEntity<Player> entity = getPlayer(pathId);
-        final Player savedPlayer = entity.getBody();
-        if(savedPlayer == null) {
-            return entity;
-        }
-        playerService.deletePlayer(savedPlayer);
-        return new ResponseEntity<>(HttpStatus.OK);
+    @DeleteMapping("/players/{id}")
+    public ResponseEntity<Player> deletePlayer(@PathVariable Long id) {
+        playerService.deletePlayer(id);
+        return ResponseEntity.ok().build();
     }
 
-    private Long convertIdToLong(String pathId) {
-        if (pathId == null) {
-            return null;
-        } else try {
-            return Long.parseLong(pathId);
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
 }

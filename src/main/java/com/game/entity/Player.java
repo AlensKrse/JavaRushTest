@@ -5,11 +5,10 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "player")
 public class Player {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
     private String name;
     private String title;
@@ -59,9 +58,7 @@ public class Player {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public void setTitle(String title) {this.title = title; }
 
     public Race getRace() {
         return race;
@@ -93,10 +90,6 @@ public class Player {
 
     public void setLevel(Integer level) {
         this.level = level;
-    }
-
-    public Integer getUntilNextLevel() {
-        return untilNextLevel;
     }
 
     public void setUntilNextLevel(Integer untilNextLevel) {
