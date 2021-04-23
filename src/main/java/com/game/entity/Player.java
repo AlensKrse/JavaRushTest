@@ -2,34 +2,25 @@ package com.game.entity;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Table(name = "player")
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="id")
+
     private Long id;
-    @Column(name="name")
     private String name;
-    @Column(name="title")
     private String title;
     @Enumerated(EnumType.STRING)
-    @Column(name="race")
     private Race race;
     @Enumerated(EnumType.STRING)
-    @Column(name="profession")
     private Profession profession;
-    @Column(name="experience")
     private Integer experience;
-    @Column(name="level")
     private Integer level;
-    @Column(name="untilNextLevel")
     private Integer untilNextLevel;
-    @Temporal(TemporalType.DATE)
-    @Column(name="birthday")
     private Date birthday;
-    @Column(name="banned")
     private Boolean banned;
 
 
@@ -126,5 +117,18 @@ public class Player {
 
     public void setBanned(Boolean banned) {
         this.banned = banned;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Player player = (Player) o;
+        return Objects.equals(id, player.id) && Objects.equals(name, player.name) && Objects.equals(title, player.title) && race == player.race && profession == player.profession && Objects.equals(experience, player.experience) && Objects.equals(level, player.level) && Objects.equals(untilNextLevel, player.untilNextLevel) && Objects.equals(birthday, player.birthday) && Objects.equals(banned, player.banned);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, title, race, profession, experience, level, untilNextLevel, birthday, banned);
     }
 }
