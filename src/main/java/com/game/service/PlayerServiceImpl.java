@@ -132,20 +132,20 @@ public class PlayerServiceImpl implements PlayerService{
         final Date afterDate = after == null ? null : new Date(after);
         final Date beforeDate = before == null ? null : new Date(before);
         final List<Player> list = new ArrayList<>();
-        playerRepository.findAll().forEach((ship) -> {
-            if (name != null && !ship.getName().contains(name)) return;
-            if (title != null && !ship.getTitle().contains(title)) return;
-            if (race != null && ship.getRace() != race) return;
-            if (profession != null && !ship.getProfession().equals(profession)) return;
-            if (afterDate != null && ship.getBirthday().before(afterDate)) return;
-            if (beforeDate != null && ship.getBirthday().after(beforeDate)) return;
-            if (banned != null && ship.getBanned().booleanValue() != banned.booleanValue()) return;
-            if (minExperience != null && ship.getExperience().compareTo(minExperience) < 0) return;
-            if (maxExperience != null && ship.getExperience().compareTo(maxExperience) > 0) return;
-            if (minLevel != null && ship.getLevel().compareTo(minLevel) < 0) return;
-            if (maxLevel != null && ship.getLevel().compareTo(maxLevel) > 0) return;
+        playerRepository.findAll().forEach((player) -> {
+            if (name != null && !player.getName().contains(name)) return;
+            if (title != null && !player.getTitle().contains(title)) return;
+            if (race != null && player.getRace() != race) return;
+            if (profession != null && !player.getProfession().equals(profession)) return;
+            if (afterDate != null && player.getBirthday().before(afterDate)) return;
+            if (beforeDate != null && player.getBirthday().after(beforeDate)) return;
+            if (banned != null && player.getBanned().booleanValue() != banned.booleanValue()) return;
+            if (minExperience != null && player.getExperience().compareTo(minExperience) < 0) return;
+            if (maxExperience != null && player.getExperience().compareTo(maxExperience) > 0) return;
+            if (minLevel != null && player.getLevel().compareTo(minLevel) < 0) return;
+            if (maxLevel != null && player.getLevel().compareTo(maxLevel) > 0) return;
 
-            list.add(ship);
+            list.add(player);
         });
         return list;
     }
