@@ -117,7 +117,7 @@ public class PlayerController {
         playerService.deletePlayer(savedPlayer);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-    
+
     private Long convertIdToLong(String pathId) {
         if (pathId == null) {
             return null;
